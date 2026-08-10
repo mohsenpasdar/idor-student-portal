@@ -1,0 +1,1 @@
+-- The users and documents tables will be defined in Phase 2.3.

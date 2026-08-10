@@ -1,0 +1,21 @@
+# Project-specific Python environment
+.venv/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Flask and SQLite runtime data
+instance/*.db
+.env
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
