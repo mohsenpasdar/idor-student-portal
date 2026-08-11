@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{{ status_code }} {{ error_title }} | Student Document Portal{% endblock %}
+
+{% block content %}
+    <div class="error-page">
+        <p class="error-code">{{ status_code }}</p>
+        <p class="eyebrow">Request could not be completed</p>
+        <h1>{{ error_title }}</h1>
+        <p>{{ error_message }}</p>
+
+        {% if g.user %}
+            <a class="button" href="{{ url_for('dashboard') }}">Return to dashboard</a>
+        {% else %}
+            <a class="button" href="{{ url_for('home') }}">Return to home page</a>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -8,9 +8,10 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2.7 is complete: all three fictional students can log in, each dashboard
-lists only the two documents owned by that student, and the individual
-document page intentionally contains the approved IDOR vulnerability.
+Phase 2 is complete: all three fictional students can log in, each dashboard
+lists only the two documents owned by that student, the individual document
+page intentionally contains the approved IDOR vulnerability, and expected
+`403` and `404` errors use a shared page.
 
 ## Requirements
 
@@ -124,7 +125,8 @@ Both requests return `200 OK`. The second result is the planned security
 failure: authentication is enforced, but document ownership is not.
 
 Opening a vulnerable document URL while logged out redirects to `/login`, and
-requesting a document ID that does not exist returns `404 Not Found`.
+requesting a document ID that does not exist returns a styled `404 Not Found`
+page while preserving the correct HTTP status code.
 
 The browser receives a signed session cookie containing only the user's numeric
 ID. It does not contain the password or password hash. If `PORTAL_SECRET_KEY` is
@@ -212,7 +214,7 @@ The page clearly labels this behaviour because the application is an
 educational local prototype. The ownership-check and user-scoped-query defenses
 have not been added yet; they will be separate routes in later checkpoints.
 
-## Files used through Phase 2.7
+## Files used through Phase 2
 
 - `app.py` creates Flask and handles authentication, sessions, and routes.
 - `database.py` creates, initializes, connects to, and queries SQLite.
@@ -224,7 +226,20 @@ have not been added yet; they will be separate routes in later checkpoints.
   document rows and links to the vulnerable route.
 - `templates/document.html` displays one document and highlights whether it
   belongs to the signed-in student.
+- `templates/error.html` provides a shared page for expected `403 Forbidden`
+  and `404 Not Found` responses.
 - `static/style.css` controls the page's appearance.
+
+## Phase 2 completion checklist
+
+- Logged-out access to `/dashboard` redirects to `/login`.
+- Alice can log in and sees only document IDs `1` and `2`.
+- Alice can open her own document `1`.
+- Changing the vulnerable URL from document `1` to Bob's document `3` exposes
+  Bob's fictional grade report with `200 OK`, confirming the planned IDOR.
+- A nonexistent document such as `999` returns the styled `404` page.
+- Bob and Charlie each see only their own two documents.
+- Logging out clears the session and protects the dashboard again.
 
 ## Leave the virtual environment
 

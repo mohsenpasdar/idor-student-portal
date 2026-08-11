@@ -130,5 +130,31 @@ def logout():
     return redirect(url_for("home"))
 
 
+@app.errorhandler(403)
+@app.errorhandler(404)
+def handle_http_error(error):
+    """Display expected access and missing-page errors consistently."""
+    messages = {
+        403: (
+            "Access forbidden",
+            "You are signed in, but you are not allowed to access this resource.",
+        ),
+        404: (
+            "Page not found",
+            "The page or document you requested does not exist.",
+        ),
+    }
+    error_title, error_message = messages[error.code]
+    return (
+        render_template(
+            "error.html",
+            status_code=error.code,
+            error_title=error_title,
+            error_message=error_message,
+        ),
+        error.code,
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
