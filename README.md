@@ -8,9 +8,9 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2.6 is complete: all three fictional students can log in, and the
-protected dashboard retrieves and lists only the two documents owned by the
-current signed-in student.
+Phase 2.7 is complete: all three fictional students can log in, each dashboard
+lists only the two documents owned by that student, and the individual
+document page intentionally contains the approved IDOR vulnerability.
 
 ## Requirements
 
@@ -88,7 +88,7 @@ the Student Document Portal home page.
 Keep the terminal open while using the application. To stop the Flask server,
 return to the terminal and press `Ctrl+C`.
 
-## Test the private dashboard
+## Test the dashboard and vulnerable route
 
 Open `http://127.0.0.1:5000/login` and use any fictional account:
 
@@ -110,6 +110,21 @@ these document IDs:
 
 Use **Log out** in the page header, then sign in as another student to confirm
 that the dashboard list changes with the account.
+
+To demonstrate the intentional vulnerability:
+
+1. Log in as Alice.
+2. Open document `1` from Alice's dashboard.
+3. Confirm that the browser address ends with
+   `/document/vulnerable/1`.
+4. Change only the final `1` to `3` and press Enter.
+5. Bob's grade report is displayed even though Alice is still signed in.
+
+Both requests return `200 OK`. The second result is the planned security
+failure: authentication is enforced, but document ownership is not.
+
+Opening a vulnerable document URL while logged out redirects to `/login`, and
+requesting a document ID that does not exist returns `404 Not Found`.
 
 The browser receives a signed session cookie containing only the user's numeric
 ID. It does not contain the password or password hash. If `PORTAL_SECRET_KEY` is
@@ -166,7 +181,7 @@ SQL injection into the IDOR experiment.
 The application uses `get_user_by_username()` during login and
 `get_user_by_id()` to load the signed-in user at the start of each request.
 
-## Session-based authentication and dashboard filtering
+## Authentication, dashboard filtering, and IDOR
 
 - `load_logged_in_user()` reads `user_id` from the signed session and loads the
   matching database user into Flask's request-local `g` object.
@@ -177,17 +192,27 @@ The application uses `get_user_by_username()` during login and
 - `/dashboard` passes `g.user["id"]` to `get_documents_by_owner()` and sends the
   resulting rows to `dashboard.html`.
 - `dashboard.html` loops over those rows and displays each document's type,
-  title, and numeric ID.
+  title, numeric ID, and a link to the individual document page.
+- `/document/vulnerable/<document_id>` requires login but retrieves a document
+  using only the numeric ID from the URL.
+- `document.html` displays the selected document's owner, metadata, and full
+  fictional content.
 
 The dashboard query includes `owner_id`, so one student's list cannot contain
 another student's documents. Authentication answers **who the user is**, while
 this owner-filtered query controls which records appear in the dashboard.
 
-The dashboard does not yet open individual documents. The document-view route
-and its intentional object-level authorization flaw will be added separately,
-as defined in the approved experiment scope.
+The dashboard query is safe because it includes the signed-in student's owner
+ID. The individual vulnerable route is not safe because it never compares
+`document["owner_id"]` with `g.user["id"]`. A logged-in student can therefore
+change the numeric URL value and retrieve another student's document. This is
+the controlled IDOR baseline defined in the approved experiment scope.
 
-## Files used through Phase 2.6
+The page clearly labels this behaviour because the application is an
+educational local prototype. The ownership-check and user-scoped-query defenses
+have not been added yet; they will be separate routes in later checkpoints.
+
+## Files used through Phase 2.7
 
 - `app.py` creates Flask and handles authentication, sessions, and routes.
 - `database.py` creates, initializes, connects to, and queries SQLite.
@@ -196,7 +221,9 @@ as defined in the approved experiment scope.
 - `templates/home.html` defines the public home page.
 - `templates/login.html` defines the login form.
 - `templates/dashboard.html` loops over and displays the current student's
-  document rows.
+  document rows and links to the vulnerable route.
+- `templates/document.html` displays one document and highlights whether it
+  belongs to the signed-in student.
 - `static/style.css` controls the page's appearance.
 
 ## Leave the virtual environment

@@ -6,19 +6,26 @@
     <p class="eyebrow">Private dashboard</p>
     <h1>{{ g.user['name'] }}'s documents</h1>
     <div class="notice">
-        Phase 2.6 is working: this list is filtered using your signed-in
-        user ID.
+        This list is safely filtered using your signed-in user ID. The
+        individual document link intentionally uses the vulnerable Phase 2.7
+        route for our controlled experiment.
     </div>
 
     {% if documents %}
         <div class="document-list">
             {% for document in documents %}
                 <article class="document-card">
-                    <div>
+                    <div class="document-summary">
                         <p class="document-type">{{ document['document_type'] }}</p>
                         <h2>{{ document['title'] }}</h2>
                     </div>
-                    <span class="document-id">Document ID {{ document['id'] }}</span>
+                    <div class="document-actions">
+                        <span class="document-id">Document ID {{ document['id'] }}</span>
+                        <a
+                            class="button button-secondary"
+                            href="{{ url_for('vulnerable_document', document_id=document['id']) }}"
+                        >Open document</a>
+                    </div>
                 </article>
             {% endfor %}
         </div>

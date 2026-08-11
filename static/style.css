@@ -100,6 +100,18 @@ p {
     background: #194d85;
 }
 
+.button-secondary {
+    padding: 9px 13px;
+    background: #e4edf7;
+    color: #194d85;
+    font-size: 0.85rem;
+}
+
+.button-secondary:hover,
+.button-secondary:focus-visible {
+    background: #cadcf0;
+}
+
 .inline-form {
     display: inline;
 }
@@ -199,6 +211,17 @@ p {
     background: #f8fafc;
 }
 
+.document-summary {
+    min-width: 0;
+}
+
+.document-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 10px;
+}
+
 .document-type {
     margin: 0;
     color: #526277;
@@ -227,6 +250,68 @@ p {
     text-align: center;
 }
 
+.vulnerability-note,
+.authorization-failure {
+    margin: 24px 0;
+    padding: 16px 18px;
+    border-left: 4px solid #b66a15;
+    border-radius: 6px;
+    background: #fff4e5;
+    color: #75430d;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.authorization-failure {
+    border-left-color: #b93737;
+    background: #fdecec;
+    color: #812626;
+}
+
+.document-metadata {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 28px 0;
+}
+
+.document-metadata div {
+    padding: 14px;
+    border: 1px solid #d6e0ea;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.document-metadata dt {
+    color: #526277;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.document-metadata dd {
+    margin: 6px 0 0;
+    font-weight: 700;
+}
+
+.document-body {
+    margin: 28px 0;
+    padding: 22px;
+    border: 1px solid #d6e0ea;
+    border-radius: 10px;
+}
+
+.document-content {
+    margin-bottom: 0;
+    white-space: pre-line;
+}
+
+.back-link {
+    color: #2463a8;
+    font-weight: 700;
+}
+
 @media (max-width: 640px) {
     body {
         padding: 16px;
@@ -250,5 +335,14 @@ p {
         align-items: flex-start;
         flex-direction: column;
         gap: 12px;
+    }
+
+    .document-actions {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .document-metadata {
+        grid-template-columns: 1fr;
     }
 }

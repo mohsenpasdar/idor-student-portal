@@ -6,6 +6,7 @@ import secrets
 
 from flask import (
     Flask,
+    abort,
     flash,
     g,
     redirect,
@@ -17,6 +18,7 @@ from flask import (
 from werkzeug.security import check_password_hash
 
 from database import (
+    get_document_by_id,
     get_documents_by_owner,
     get_user_by_id,
     get_user_by_username,
@@ -98,6 +100,26 @@ def dashboard():
     """Display only the documents owned by the signed-in student."""
     documents = get_documents_by_owner(g.user["id"])
     return render_template("dashboard.html", documents=documents)
+
+
+@app.route("/document/vulnerable/<int:document_id>")
+@login_required
+def vulnerable_document(document_id):
+    """Display a document without checking whether the user owns it."""
+    document = get_document_by_id(document_id)
+
+    if document is None:
+        abort(404)
+
+    # Intentionally vulnerable for this controlled experiment:
+    # the route retrieves by document ID but does not compare owner_id with
+    # g.user["id"]. The secure versions will add that authorization step.
+    owner = get_user_by_id(document["owner_id"])
+    return render_template(
+        "document.html",
+        document=document,
+        owner=owner,
+    )
 
 
 @app.post("/logout")

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ document['title'] }} | Student Document Portal{% endblock %}
+
+{% block content %}
+    <p class="eyebrow">Intentionally vulnerable document route</p>
+    <h1>{{ document['title'] }}</h1>
+
+    <div class="vulnerability-note">
+        For this controlled experiment, the server confirms that you are
+        logged in but does not confirm that you own the requested document.
+    </div>
+
+    {% if document['owner_id'] != g.user['id'] %}
+        <div class="authorization-failure">
+            IDOR demonstrated: you are signed in as {{ g.user['name'] }}, but
+            this document belongs to {{ owner['name'] }}. The vulnerable route
+            still returned its private content.
+        </div>
+    {% else %}
+        <div class="notice">
+            This document belongs to your account. Change the numeric document
+            ID in the URL to test the planned IDOR demonstration.
+        </div>
+    {% endif %}
+
+    <dl class="document-metadata">
+        <div>
+            <dt>Document ID</dt>
+            <dd>{{ document['id'] }}</dd>
+        </div>
+        <div>
+            <dt>Document type</dt>
+            <dd>{{ document['document_type'] }}</dd>
+        </div>
+        <div>
+            <dt>Owner</dt>
+            <dd>{{ owner['name'] }}</dd>
+        </div>
+    </dl>
+
+    <section class="document-body" aria-labelledby="document-content-heading">
+        <h2 id="document-content-heading">Document contents</h2>
+        <p class="document-content">{{ document['content'] }}</p>
+    </section>
+
+    <a class="back-link" href="{{ url_for('dashboard') }}">Back to dashboard</a>
+{% endblock %}
