@@ -15,11 +15,16 @@
             vulnerability and two server-side authorization defenses.
         </p>
         <div class="notice">
-            Phase 2.3 is working: the fictional SQLite database is ready.
+            {% if database_ready %}
+                Phase 2.4 is working: Flask retrieved the fictional data from
+                SQLite successfully.
+            {% else %}
+                The expected fictional database records could not be found.
+            {% endif %}
         </div>
         <p class="next-step">
-            Next, Flask will be connected to the database through reusable
-            helper functions.
+            Next, the portal will use these database helpers to implement
+            login and logout.
         </p>
     </main>
 </body>

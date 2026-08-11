@@ -1,8 +1,9 @@
-"""Create and initialize the fictional SQLite database."""
+"""Create, initialize, and query the fictional SQLite database."""
 
 from pathlib import Path
 import sqlite3
 
+from flask import current_app, g
 from werkzeug.security import generate_password_hash
 
 
@@ -64,13 +65,67 @@ DOCUMENTS = (
 )
 
 
-def connect_database():
+def connect_database(database_path=DATABASE_PATH):
     """Open the project database and enable foreign-key enforcement."""
     INSTANCE_DIRECTORY.mkdir(exist_ok=True)
-    connection = sqlite3.connect(DATABASE_PATH)
+    connection = sqlite3.connect(database_path)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     return connection
+
+
+def get_database():
+    """Return one database connection for the current Flask request."""
+    if "database" not in g:
+        g.database = connect_database(current_app.config["DATABASE"])
+
+    return g.database
+
+
+def close_database(_exception=None):
+    """Close the current request's database connection, if one exists."""
+    database = g.pop("database", None)
+
+    if database is not None:
+        database.close()
+
+
+def init_app(app):
+    """Configure database access for a Flask application."""
+    app.config.setdefault("DATABASE", DATABASE_PATH)
+    app.teardown_appcontext(close_database)
+
+
+def get_user_by_id(user_id):
+    """Return one user by primary key, or None when the user does not exist."""
+    return get_database().execute(
+        "SELECT * FROM users WHERE id = ?",
+        (user_id,),
+    ).fetchone()
+
+
+def get_user_by_username(username):
+    """Return one user by username, or None when the user does not exist."""
+    return get_database().execute(
+        "SELECT * FROM users WHERE username = ?",
+        (username,),
+    ).fetchone()
+
+
+def get_documents_by_owner(owner_id):
+    """Return all documents owned by one user in document-ID order."""
+    return get_database().execute(
+        "SELECT * FROM documents WHERE owner_id = ? ORDER BY id",
+        (owner_id,),
+    ).fetchall()
+
+
+def get_document_by_id(document_id):
+    """Return one document by primary key, or None when it does not exist."""
+    return get_database().execute(
+        "SELECT * FROM documents WHERE id = ?",
+        (document_id,),
+    ).fetchone()
 
 
 def initialize_database():

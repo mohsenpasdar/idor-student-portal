@@ -8,9 +8,9 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2.3 is complete: the project includes a reproducible SQLite schema and a
-script that loads the three fictional students and six documents defined in the
-experiment scope.
+Phase 2.4 is complete: Flask now opens and closes SQLite connections safely and
+uses reusable, parameterized query functions to retrieve fictional users and
+documents.
 
 ## Requirements
 
@@ -108,10 +108,30 @@ users.id <-- documents.owner_id
 assigned to a user who does not exist. The passwords in the approved scope are
 simple demo credentials, but the database stores only password hashes.
 
-## Files used through Phase 2.3
+## Flask database access
 
-- `app.py` creates the Flask application and handles the `/` route.
-- `database.py` creates the database and inserts the fictional records.
+During a request, `get_database()` opens one SQLite connection and stores it in
+Flask's request context. Every query in that request reuses the same connection.
+Flask automatically calls `close_database()` when the request ends.
+
+The reusable query functions are:
+
+- `get_user_by_id(user_id)`
+- `get_user_by_username(username)`
+- `get_documents_by_owner(owner_id)`
+- `get_document_by_id(document_id)`
+
+Each function uses SQL placeholders (`?`) instead of inserting input directly
+into an SQL string. This keeps the queries parameterized and avoids introducing
+SQL injection into the IDOR experiment.
+
+The home route now retrieves Alice and her two documents using these functions.
+It displays a success message only when Flask receives the expected records.
+
+## Files used through Phase 2.4
+
+- `app.py` creates Flask, registers database handling, and handles the `/` route.
+- `database.py` creates, initializes, connects to, and queries SQLite.
 - `schema.sql` defines the `users` and `documents` tables.
 - `templates/home.html` defines the page shown in the browser.
 - `static/style.css` controls the page's appearance.
