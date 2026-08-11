@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Log in | Student Document Portal{% endblock %}
+
+{% block content %}
+    <p class="eyebrow">Fictional accounts only</p>
+    <h1>Student login</h1>
+    <p>Enter one of the approved demo accounts to continue.</p>
+
+    <form class="login-form" method="post">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+        <button class="button" type="submit">Log in</button>
+    </form>
+
+    <details class="demo-accounts">
+        <summary>Show demo credentials</summary>
+        <ul>
+            <li><code>alice</code> / <code>alice123</code></li>
+            <li><code>bob</code> / <code>bob123</code></li>
+            <li><code>charlie</code> / <code>charlie123</code></li>
+        </ul>
+    </details>
+{% endblock %}

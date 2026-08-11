@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Student Document Portal{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('home') }}">Student Document Portal</a>
+        <nav aria-label="Main navigation">
+            {% if g.user %}
+                <span class="signed-in-user">Signed in as {{ g.user['name'] }}</span>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <form class="inline-form" action="{{ url_for('logout') }}" method="post">
+                    <button class="link-button" type="submit">Log out</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('login') }}">Log in</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="page-card">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages" aria-live="polite">
+                    {% for category, message in messages %}
+                        <p class="flash {{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

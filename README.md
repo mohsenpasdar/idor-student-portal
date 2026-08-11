@@ -8,9 +8,9 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2.4 is complete: Flask now opens and closes SQLite connections safely and
-uses reusable, parameterized query functions to retrieve fictional users and
-documents.
+Phase 2.5 is complete: all three fictional students can log in using verified
+password hashes, Flask remembers the current user in a signed session, and the
+protected dashboard redirects anonymous visitors to the login page.
 
 ## Requirements
 
@@ -88,6 +88,35 @@ the Student Document Portal home page.
 Keep the terminal open while using the application. To stop the Flask server,
 return to the terminal and press `Ctrl+C`.
 
+## Test login and logout
+
+Open `http://127.0.0.1:5000/login` and use any fictional account:
+
+| Name | Username | Password |
+| --- | --- | --- |
+| Alice Johnson | `alice` | `alice123` |
+| Bob Smith | `bob` | `bob123` |
+| Charlie Brown | `charlie` | `charlie123` |
+
+A correct login redirects to `/dashboard`. The dashboard is protected: opening
+it while logged out redirects to `/login`. Use **Log out** in the page header to
+clear the session.
+
+The browser receives a signed session cookie containing only the user's numeric
+ID. It does not contain the password or password hash. If `PORTAL_SECRET_KEY` is
+not configured, the app generates a temporary random signing key when it
+starts. This is convenient and safe for a local demonstration, but it means
+existing sessions end whenever the server restarts.
+
+The session cookie is also marked `HttpOnly` and `SameSite=Lax`. The `Secure`
+setting is intentionally not enabled because this controlled app uses local
+HTTP rather than HTTPS.
+
+The login form retrieves the submitted username using a parameterized query and
+uses Werkzeug's `check_password_hash()` to verify the password against the hash
+stored in SQLite. Its error message does not reveal whether the username or the
+password was incorrect.
+
 ## Database design
 
 SQLite stores the complete database in the generated `instance\portal.db`
@@ -125,15 +154,33 @@ Each function uses SQL placeholders (`?`) instead of inserting input directly
 into an SQL string. This keeps the queries parameterized and avoids introducing
 SQL injection into the IDOR experiment.
 
-The home route now retrieves Alice and her two documents using these functions.
-It displays a success message only when Flask receives the expected records.
+The application uses `get_user_by_username()` during login and
+`get_user_by_id()` to load the signed-in user at the start of each request.
 
-## Files used through Phase 2.4
+## Session-based authentication
 
-- `app.py` creates Flask, registers database handling, and handles the `/` route.
+- `load_logged_in_user()` reads `user_id` from the signed session and loads the
+  matching database user into Flask's request-local `g` object.
+- `login_required` protects routes that should only be available to an
+  authenticated student.
+- `/login` verifies the submitted credentials and creates the session.
+- `/logout` clears the session and returns to the public home page.
+- `/dashboard` is a protected placeholder. It will list the current student's
+  documents in the next phase.
+
+Authentication answers **who the user is**. It does not yet decide whether that
+user may access a particular document. Object-level authorization will be added
+separately so the project can demonstrate the intended IDOR vulnerability.
+
+## Files used through Phase 2.5
+
+- `app.py` creates Flask and handles authentication, sessions, and routes.
 - `database.py` creates, initializes, connects to, and queries SQLite.
 - `schema.sql` defines the `users` and `documents` tables.
-- `templates/home.html` defines the page shown in the browser.
+- `templates/base.html` provides the shared header, navigation, and messages.
+- `templates/home.html` defines the public home page.
+- `templates/login.html` defines the login form.
+- `templates/dashboard.html` defines the protected dashboard placeholder.
 - `static/style.css` controls the page's appearance.
 
 ## Leave the virtual environment

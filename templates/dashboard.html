@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Student Document Portal{% endblock %}
+
+{% block content %}
+    <p class="eyebrow">Protected page</p>
+    <h1>Welcome, {{ g.user['name'] }}</h1>
+    <div class="notice">
+        Phase 2.5 is working: only a logged-in user can reach this dashboard.
+    </div>
+    <p class="next-step">
+        In Phase 2.6, this page will retrieve and list only your documents.
+    </p>
+{% endblock %}

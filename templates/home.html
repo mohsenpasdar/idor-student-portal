@@ -1,31 +1,26 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IDOR Student Document Portal</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <main class="page-card">
-        <p class="eyebrow">Local security demonstration</p>
-        <h1>Student Document Portal</h1>
-        <p>
-            This educational Flask application will demonstrate an IDOR
-            vulnerability and two server-side authorization defenses.
-        </p>
+{% extends "base.html" %}
+
+{% block title %}Home | Student Document Portal{% endblock %}
+
+{% block content %}
+    <p class="eyebrow">Local security demonstration</p>
+    <h1>Student Document Portal</h1>
+    <p>
+        This educational Flask application will demonstrate an IDOR
+        vulnerability and two server-side authorization defenses.
+    </p>
+
+    {% if g.user %}
         <div class="notice">
-            {% if database_ready %}
-                Phase 2.4 is working: Flask retrieved the fictional data from
-                SQLite successfully.
-            {% else %}
-                The expected fictional database records could not be found.
-            {% endif %}
+            Phase 2.5 is working: your signed session identifies you as
+            {{ g.user['name'] }}.
         </div>
-        <p class="next-step">
-            Next, the portal will use these database helpers to implement
-            login and logout.
-        </p>
-    </main>
-</body>
-</html>
+        <a class="button" href="{{ url_for('dashboard') }}">Open dashboard</a>
+    {% else %}
+        <div class="notice">
+            Phase 2.5 is ready: log in with one of the fictional student
+            accounts to create a session.
+        </div>
+        <a class="button" href="{{ url_for('login') }}">Log in</a>
+    {% endif %}
+{% endblock %}
