@@ -8,9 +8,9 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2.1 is complete: the Python environment and starter project structure are
-prepared. The application routes and database will be implemented in the next
-steps.
+Phase 2.2 is complete: the project includes a minimal Flask application, a home
+route, an HTML template, and basic styling. The database will be implemented in
+the next step.
 
 ## Requirements
 
@@ -43,10 +43,36 @@ After activation, the terminal prompt normally begins with `(.venv)`.
 ## Check the installation
 
 ```bash
-python -c "import flask; print(flask.__version__)"
+python -c "from importlib.metadata import version; print(version('flask'))"
 ```
 
 The expected Flask version for this milestone is `3.1.3`.
+
+## Run the application
+
+Make sure the virtual environment is active, then run:
+
+```powershell
+python app.py
+```
+
+The terminal should display a local address similar to:
+
+```text
+http://127.0.0.1:5000
+```
+
+Hold `Ctrl` and click the address, or copy it into a web browser. You should see
+the Student Document Portal home page.
+
+Keep the terminal open while using the application. To stop the Flask server,
+return to the terminal and press `Ctrl+C`.
+
+## Files used in Phase 2.2
+
+- `app.py` creates the Flask application and handles the `/` route.
+- `templates/home.html` defines the page shown in the browser.
+- `static/style.css` controls the page's appearance.
 
 ## Leave the virtual environment
 
