@@ -16,7 +16,12 @@ from flask import (
 )
 from werkzeug.security import check_password_hash
 
-from database import get_user_by_id, get_user_by_username, init_app
+from database import (
+    get_documents_by_owner,
+    get_user_by_id,
+    get_user_by_username,
+    init_app,
+)
 
 
 app = Flask(__name__)
@@ -90,8 +95,9 @@ def login():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    """Display a protected placeholder for the document dashboard."""
-    return render_template("dashboard.html")
+    """Display only the documents owned by the signed-in student."""
+    documents = get_documents_by_owner(g.user["id"])
+    return render_template("dashboard.html", documents=documents)
 
 
 @app.post("/logout")

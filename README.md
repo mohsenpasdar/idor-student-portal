@@ -8,9 +8,9 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2.5 is complete: all three fictional students can log in using verified
-password hashes, Flask remembers the current user in a signed session, and the
-protected dashboard redirects anonymous visitors to the login page.
+Phase 2.6 is complete: all three fictional students can log in, and the
+protected dashboard retrieves and lists only the two documents owned by the
+current signed-in student.
 
 ## Requirements
 
@@ -88,7 +88,7 @@ the Student Document Portal home page.
 Keep the terminal open while using the application. To stop the Flask server,
 return to the terminal and press `Ctrl+C`.
 
-## Test login and logout
+## Test the private dashboard
 
 Open `http://127.0.0.1:5000/login` and use any fictional account:
 
@@ -99,8 +99,17 @@ Open `http://127.0.0.1:5000/login` and use any fictional account:
 | Charlie Brown | `charlie` | `charlie123` |
 
 A correct login redirects to `/dashboard`. The dashboard is protected: opening
-it while logged out redirects to `/login`. Use **Log out** in the page header to
-clear the session.
+it while logged out redirects to `/login`. Each account should display exactly
+these document IDs:
+
+| Account | Document IDs |
+| --- | --- |
+| Alice | `1`, `2` |
+| Bob | `3`, `4` |
+| Charlie | `5`, `6` |
+
+Use **Log out** in the page header, then sign in as another student to confirm
+that the dashboard list changes with the account.
 
 The browser receives a signed session cookie containing only the user's numeric
 ID. It does not contain the password or password hash. If `PORTAL_SECRET_KEY` is
@@ -157,7 +166,7 @@ SQL injection into the IDOR experiment.
 The application uses `get_user_by_username()` during login and
 `get_user_by_id()` to load the signed-in user at the start of each request.
 
-## Session-based authentication
+## Session-based authentication and dashboard filtering
 
 - `load_logged_in_user()` reads `user_id` from the signed session and loads the
   matching database user into Flask's request-local `g` object.
@@ -165,14 +174,20 @@ The application uses `get_user_by_username()` during login and
   authenticated student.
 - `/login` verifies the submitted credentials and creates the session.
 - `/logout` clears the session and returns to the public home page.
-- `/dashboard` is a protected placeholder. It will list the current student's
-  documents in the next phase.
+- `/dashboard` passes `g.user["id"]` to `get_documents_by_owner()` and sends the
+  resulting rows to `dashboard.html`.
+- `dashboard.html` loops over those rows and displays each document's type,
+  title, and numeric ID.
 
-Authentication answers **who the user is**. It does not yet decide whether that
-user may access a particular document. Object-level authorization will be added
-separately so the project can demonstrate the intended IDOR vulnerability.
+The dashboard query includes `owner_id`, so one student's list cannot contain
+another student's documents. Authentication answers **who the user is**, while
+this owner-filtered query controls which records appear in the dashboard.
 
-## Files used through Phase 2.5
+The dashboard does not yet open individual documents. The document-view route
+and its intentional object-level authorization flaw will be added separately,
+as defined in the approved experiment scope.
+
+## Files used through Phase 2.6
 
 - `app.py` creates Flask and handles authentication, sessions, and routes.
 - `database.py` creates, initializes, connects to, and queries SQLite.
@@ -180,7 +195,8 @@ separately so the project can demonstrate the intended IDOR vulnerability.
 - `templates/base.html` provides the shared header, navigation, and messages.
 - `templates/home.html` defines the public home page.
 - `templates/login.html` defines the login form.
-- `templates/dashboard.html` defines the protected dashboard placeholder.
+- `templates/dashboard.html` loops over and displays the current student's
+  document rows.
 - `static/style.css` controls the page's appearance.
 
 ## Leave the virtual environment

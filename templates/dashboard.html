@@ -3,12 +3,26 @@
 {% block title %}Dashboard | Student Document Portal{% endblock %}
 
 {% block content %}
-    <p class="eyebrow">Protected page</p>
-    <h1>Welcome, {{ g.user['name'] }}</h1>
+    <p class="eyebrow">Private dashboard</p>
+    <h1>{{ g.user['name'] }}'s documents</h1>
     <div class="notice">
-        Phase 2.5 is working: only a logged-in user can reach this dashboard.
+        Phase 2.6 is working: this list is filtered using your signed-in
+        user ID.
     </div>
-    <p class="next-step">
-        In Phase 2.6, this page will retrieve and list only your documents.
-    </p>
+
+    {% if documents %}
+        <div class="document-list">
+            {% for document in documents %}
+                <article class="document-card">
+                    <div>
+                        <p class="document-type">{{ document['document_type'] }}</p>
+                        <h2>{{ document['title'] }}</h2>
+                    </div>
+                    <span class="document-id">Document ID {{ document['id'] }}</span>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-state">No documents are assigned to this account.</p>
+    {% endif %}
 {% endblock %}

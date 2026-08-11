@@ -12,14 +12,14 @@
 
     {% if g.user %}
         <div class="notice">
-            Phase 2.5 is working: your signed session identifies you as
-            {{ g.user['name'] }}.
+            Phase 2.6 is ready: your private dashboard lists only the
+            documents assigned to {{ g.user['name'] }}.
         </div>
         <a class="button" href="{{ url_for('dashboard') }}">Open dashboard</a>
     {% else %}
         <div class="notice">
-            Phase 2.5 is ready: log in with one of the fictional student
-            accounts to create a session.
+            Log in with one of the fictional student accounts to view that
+            student's private document list.
         </div>
         <a class="button" href="{{ url_for('login') }}">Log in</a>
     {% endif %}
