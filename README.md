@@ -8,9 +8,9 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2.2 is complete: the project includes a minimal Flask application, a home
-route, an HTML template, and basic styling. The database will be implemented in
-the next step.
+Phase 2.3 is complete: the project includes a reproducible SQLite schema and a
+script that loads the three fictional students and six documents defined in the
+experiment scope.
 
 ## Requirements
 
@@ -48,6 +48,26 @@ python -c "from importlib.metadata import version; print(version('flask'))"
 
 The expected Flask version for this milestone is `3.1.3`.
 
+## Initialize the fictional database
+
+With the virtual environment active, run:
+
+```powershell
+python database.py
+```
+
+Expected output:
+
+```text
+Database initialized: ...\instance\portal.db
+Users: 3
+Documents: 6
+```
+
+This command creates `instance\portal.db`. Running it again resets the database
+to the same fictional starting data. The generated database is excluded from
+Git and project archives because anyone can recreate it using this command.
+
 ## Run the application
 
 Make sure the virtual environment is active, then run:
@@ -68,9 +88,31 @@ the Student Document Portal home page.
 Keep the terminal open while using the application. To stop the Flask server,
 return to the terminal and press `Ctrl+C`.
 
-## Files used in Phase 2.2
+## Database design
+
+SQLite stores the complete database in the generated `instance\portal.db`
+file. It does not require a separate database server.
+
+The project currently has two tables:
+
+- `users` stores each student's ID, name, username, and password hash.
+- `documents` stores each document and its owner's user ID.
+
+The relationship is:
+
+```text
+users.id <-- documents.owner_id
+```
+
+`documents.owner_id` is a foreign key. It prevents a document from being
+assigned to a user who does not exist. The passwords in the approved scope are
+simple demo credentials, but the database stores only password hashes.
+
+## Files used through Phase 2.3
 
 - `app.py` creates the Flask application and handles the `/` route.
+- `database.py` creates the database and inserts the fictional records.
+- `schema.sql` defines the `users` and `documents` tables.
 - `templates/home.html` defines the page shown in the browser.
 - `static/style.css` controls the page's appearance.
 
