@@ -222,9 +222,9 @@ p {
 
 .document-card {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
     padding: 18px;
     border: 1px solid #d6e0ea;
     border-radius: 10px;
@@ -237,10 +237,10 @@ p {
 
 .document-actions {
     display: flex;
-    flex: 0 0 auto;
+    width: 100%;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 10px;
 }
 
