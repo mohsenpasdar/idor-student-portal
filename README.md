@@ -8,10 +8,10 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 3.1 is complete. The application keeps the intentionally vulnerable IDOR
-route for comparison and adds the first server-side defense: retrieve the
-document, verify that its owner ID matches the signed-in user's ID, and return
-`403 Forbidden` when the ownership check fails.
+Phase 3.2 is complete. The application keeps the intentionally vulnerable IDOR
+route for comparison and now includes both server-side defenses. The first
+retrieves the document and checks its owner. The second scopes the database
+query using both the document ID and the signed-in user's ID.
 
 ## Requirements
 
@@ -89,7 +89,7 @@ the Student Document Portal home page.
 Keep the terminal open while using the application. To stop the Flask server,
 return to the terminal and press `Ctrl+C`.
 
-## Test the dashboard, vulnerable route, and ownership check
+## Test the dashboard and all three document routes
 
 Open `http://127.0.0.1:5000/login` and use any fictional account:
 
@@ -143,6 +143,21 @@ The route first retrieves the requested document and then compares its
 Bob's document returns `403 Forbidden`. The `403` response confirms that the
 document exists, but its private content is not disclosed.
 
+To test the Phase 3.2 user-scoped-query defense:
+
+1. Stay logged in as Alice.
+2. Open document `1` using **Scoped query** on the dashboard.
+3. Confirm that the browser address ends with
+   `/document/scoped-query/1` and the document is displayed.
+4. Change only the final `1` to Bob's document ID `3` and press Enter.
+5. Confirm that Flask returns the styled `404 Not Found` page and does not
+   display Bob's document content.
+
+This route calls a database helper that searches with both `document_id` and
+`g.user["id"]`. Bob's document does not match Alice's user ID, so SQLite returns
+no row and Flask responds with `404`. This also reveals less information about
+whether another student's document exists.
+
 The browser receives a signed session cookie containing only the user's numeric
 ID. It does not contain the password or password hash. If `PORTAL_SECRET_KEY` is
 not configured, the app generates a temporary random signing key when it
@@ -190,6 +205,7 @@ The reusable query functions are:
 - `get_user_by_username(username)`
 - `get_documents_by_owner(owner_id)`
 - `get_document_by_id(document_id)`
+- `get_document_by_id_and_owner(document_id, owner_id)`
 
 Each function uses SQL placeholders (`?`) instead of inserting input directly
 into an SQL string. This keeps the queries parameterized and avoids introducing
@@ -215,6 +231,9 @@ The application uses `get_user_by_username()` during login and
 - `/document/ownership-check/<document_id>` requires login, retrieves the
   document, and returns `403 Forbidden` unless its `owner_id` matches the
   signed-in user's ID.
+- `/document/scoped-query/<document_id>` requires login and queries using both
+  the requested document ID and the signed-in user's ID. A cross-user request
+  finds no matching row and returns `404 Not Found`.
 - `document.html` displays the selected document's owner, metadata, and full
   fictional content after the selected route permits access.
 
@@ -228,11 +247,11 @@ ID. The individual vulnerable route is not safe because it never compares
 change the numeric URL value and retrieve another student's document. This is
 the controlled IDOR baseline defined in the approved experiment scope.
 
-The page clearly labels this behaviour because the application is an
-educational local prototype. Phase 3.1 adds the ownership-check defense as a
-separate route, while the user-scoped-query defense remains for Phase 3.2.
+The page clearly labels each behaviour because the application is an
+educational local prototype. The separate routes preserve the vulnerable
+baseline and allow direct comparison with both defenses.
 
-## Files used through Phase 3.1
+## Files used through Phase 3.2
 
 - `app.py` creates Flask and handles authentication, sessions, and routes.
 - `database.py` creates, initializes, connects to, and queries SQLite.
@@ -241,7 +260,7 @@ separate route, while the user-scoped-query defense remains for Phase 3.2.
 - `templates/home.html` defines the public home page.
 - `templates/login.html` defines the login form.
 - `templates/dashboard.html` loops over and displays the current student's
-  document rows and links to both the vulnerable and ownership-check routes.
+  document rows and links to the vulnerable route and both secure routes.
 - `templates/document.html` labels the selected implementation and displays a
   document only after the route permits access.
 - `templates/error.html` provides a shared page for expected `403 Forbidden`
@@ -271,6 +290,20 @@ separate route, while the user-scoped-query defense remains for Phase 3.2.
   `200 OK`.
 - The vulnerable route remains unchanged and still returns Bob's document `3`
   to Alice with `200 OK`, preserving the experiment's baseline.
+
+## Phase 3.2 validation checklist
+
+- Logged-out access to the scoped-query route redirects to `/login`.
+- Alice can access her own document `1` through the scoped-query route with
+  `200 OK`.
+- Alice cannot access Bob's document `3` through the scoped-query route;
+  SQLite returns no matching row and Flask returns `404 Not Found` without
+  displaying Bob's private content.
+- A nonexistent document such as `999` also returns `404 Not Found`.
+- Bob can access his own document `3` through the scoped-query route with
+  `200 OK`.
+- The vulnerable and ownership-check routes keep their Phase 3.1 behaviour,
+  preserving all three implementations for direct comparison.
 
 ## Leave the virtual environment
 

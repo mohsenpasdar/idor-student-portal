@@ -128,6 +128,14 @@ def get_document_by_id(document_id):
     ).fetchone()
 
 
+def get_document_by_id_and_owner(document_id, owner_id):
+    """Return a document only when its ID and owner both match."""
+    return get_database().execute(
+        "SELECT * FROM documents WHERE id = ? AND owner_id = ?",
+        (document_id, owner_id),
+    ).fetchone()
+
+
 def initialize_database():
     """Recreate the schema and load the approved fictional records."""
     database = connect_database()

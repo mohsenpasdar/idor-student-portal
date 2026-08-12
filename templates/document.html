@@ -3,14 +3,21 @@
 {% block title %}{{ document['title'] }} | Student Document Portal{% endblock %}
 
 {% block content %}
-    {% if route_type == 'ownership_check' %}
+    {% if route_type == 'scoped_query' %}
+        <p class="eyebrow">Defense 2: user-scoped query</p>
+    {% elif route_type == 'ownership_check' %}
         <p class="eyebrow">Defense 1: ownership-check route</p>
     {% else %}
         <p class="eyebrow">Intentionally vulnerable document route</p>
     {% endif %}
     <h1>{{ document['title'] }}</h1>
 
-    {% if route_type == 'ownership_check' %}
+    {% if route_type == 'scoped_query' %}
+        <div class="notice">
+            Access allowed: the database found this document using both its
+            document ID and your signed-in user ID.
+        </div>
+    {% elif route_type == 'ownership_check' %}
         <div class="notice">
             Access allowed: the server retrieved this document and verified
             that its owner ID matches your signed-in user ID.

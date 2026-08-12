@@ -19,6 +19,7 @@ from werkzeug.security import check_password_hash
 
 from database import (
     get_document_by_id,
+    get_document_by_id_and_owner,
     get_documents_by_owner,
     get_user_by_id,
     get_user_by_username,
@@ -113,7 +114,7 @@ def vulnerable_document(document_id):
 
     # Intentionally vulnerable for this controlled experiment:
     # the route retrieves by document ID but does not compare owner_id with
-    # g.user["id"]. The secure versions will add that authorization step.
+    # g.user["id"]. The secure versions add that authorization step.
     owner = get_user_by_id(document["owner_id"])
     return render_template(
         "document.html",
@@ -143,6 +144,25 @@ def ownership_check_document(document_id):
         document=document,
         owner=owner,
         route_type="ownership_check",
+    )
+
+
+@app.route("/document/scoped-query/<int:document_id>")
+@login_required
+def scoped_query_document(document_id):
+    """Display a document only when its ID and owner match the current user."""
+    # Defense 2: include the authenticated user ID in the database query so a
+    # document owned by another user is not returned to the application.
+    document = get_document_by_id_and_owner(document_id, g.user["id"])
+
+    if document is None:
+        abort(404)
+
+    return render_template(
+        "document.html",
+        document=document,
+        owner=g.user,
+        route_type="scoped_query",
     )
 
 

@@ -7,8 +7,8 @@
     <h1>{{ g.user['name'] }}'s documents</h1>
     <div class="notice">
         This list is safely filtered using your signed-in user ID. The
-        document links let you compare the vulnerable route with the Phase 3.1
-        ownership-check defense.
+        document links let you compare the vulnerable route with both
+        server-side authorization defenses.
     </div>
 
     {% if documents %}
@@ -29,6 +29,10 @@
                             class="button button-secondary button-secure"
                             href="{{ url_for('ownership_check_document', document_id=document['id']) }}"
                         >Ownership check</a>
+                        <a
+                            class="button button-secondary button-secure"
+                            href="{{ url_for('scoped_query_document', document_id=document['id']) }}"
+                        >Scoped query</a>
                     </div>
                 </article>
             {% endfor %}
