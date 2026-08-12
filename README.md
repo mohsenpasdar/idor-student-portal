@@ -8,10 +8,10 @@ object reference (IDOR) vulnerabilities using fictional student data.
 
 ## Current milestone
 
-Phase 2 is complete: all three fictional students can log in, each dashboard
-lists only the two documents owned by that student, the individual document
-page intentionally contains the approved IDOR vulnerability, and expected
-`403` and `404` errors use a shared page.
+Phase 3.1 is complete. The application keeps the intentionally vulnerable IDOR
+route for comparison and adds the first server-side defense: retrieve the
+document, verify that its owner ID matches the signed-in user's ID, and return
+`403 Forbidden` when the ownership check fails.
 
 ## Requirements
 
@@ -89,7 +89,7 @@ the Student Document Portal home page.
 Keep the terminal open while using the application. To stop the Flask server,
 return to the terminal and press `Ctrl+C`.
 
-## Test the dashboard and vulnerable route
+## Test the dashboard, vulnerable route, and ownership check
 
 Open `http://127.0.0.1:5000/login` and use any fictional account:
 
@@ -127,6 +127,21 @@ failure: authentication is enforced, but document ownership is not.
 Opening a vulnerable document URL while logged out redirects to `/login`, and
 requesting a document ID that does not exist returns a styled `404 Not Found`
 page while preserving the correct HTTP status code.
+
+To test the Phase 3.1 ownership-check defense:
+
+1. Stay logged in as Alice.
+2. Open document `1` using **Ownership check** on the dashboard.
+3. Confirm that the browser address ends with
+   `/document/ownership-check/1` and the document is displayed.
+4. Change only the final `1` to Bob's document ID `3` and press Enter.
+5. Confirm that Flask returns the styled `403 Forbidden` page and does not
+   display Bob's document content.
+
+The route first retrieves the requested document and then compares its
+`owner_id` with `g.user["id"]`. Alice's own document returns `200 OK`, while
+Bob's document returns `403 Forbidden`. The `403` response confirms that the
+document exists, but its private content is not disclosed.
 
 The browser receives a signed session cookie containing only the user's numeric
 ID. It does not contain the password or password hash. If `PORTAL_SECRET_KEY` is
@@ -197,8 +212,11 @@ The application uses `get_user_by_username()` during login and
   title, numeric ID, and a link to the individual document page.
 - `/document/vulnerable/<document_id>` requires login but retrieves a document
   using only the numeric ID from the URL.
+- `/document/ownership-check/<document_id>` requires login, retrieves the
+  document, and returns `403 Forbidden` unless its `owner_id` matches the
+  signed-in user's ID.
 - `document.html` displays the selected document's owner, metadata, and full
-  fictional content.
+  fictional content after the selected route permits access.
 
 The dashboard query includes `owner_id`, so one student's list cannot contain
 another student's documents. Authentication answers **who the user is**, while
@@ -211,10 +229,10 @@ change the numeric URL value and retrieve another student's document. This is
 the controlled IDOR baseline defined in the approved experiment scope.
 
 The page clearly labels this behaviour because the application is an
-educational local prototype. The ownership-check and user-scoped-query defenses
-have not been added yet; they will be separate routes in later checkpoints.
+educational local prototype. Phase 3.1 adds the ownership-check defense as a
+separate route, while the user-scoped-query defense remains for Phase 3.2.
 
-## Files used through Phase 2
+## Files used through Phase 3.1
 
 - `app.py` creates Flask and handles authentication, sessions, and routes.
 - `database.py` creates, initializes, connects to, and queries SQLite.
@@ -223,9 +241,9 @@ have not been added yet; they will be separate routes in later checkpoints.
 - `templates/home.html` defines the public home page.
 - `templates/login.html` defines the login form.
 - `templates/dashboard.html` loops over and displays the current student's
-  document rows and links to the vulnerable route.
-- `templates/document.html` displays one document and highlights whether it
-  belongs to the signed-in student.
+  document rows and links to both the vulnerable and ownership-check routes.
+- `templates/document.html` labels the selected implementation and displays a
+  document only after the route permits access.
 - `templates/error.html` provides a shared page for expected `403 Forbidden`
   and `404 Not Found` responses.
 - `static/style.css` controls the page's appearance.
@@ -240,6 +258,19 @@ have not been added yet; they will be separate routes in later checkpoints.
 - A nonexistent document such as `999` returns the styled `404` page.
 - Bob and Charlie each see only their own two documents.
 - Logging out clears the session and protects the dashboard again.
+
+## Phase 3.1 validation checklist
+
+- Logged-out access to the ownership-check route redirects to `/login`.
+- Alice can access her own document `1` through the ownership-check route with
+  `200 OK`.
+- Alice cannot access Bob's document `3` through the ownership-check route;
+  Flask returns `403 Forbidden` without displaying Bob's private content.
+- A nonexistent document such as `999` returns `404 Not Found`.
+- Bob can access his own document `3` through the ownership-check route with
+  `200 OK`.
+- The vulnerable route remains unchanged and still returns Bob's document `3`
+  to Alice with `200 OK`, preserving the experiment's baseline.
 
 ## Leave the virtual environment
 

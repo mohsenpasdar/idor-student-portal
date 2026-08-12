@@ -119,6 +119,30 @@ def vulnerable_document(document_id):
         "document.html",
         document=document,
         owner=owner,
+        route_type="vulnerable",
+    )
+
+
+@app.route("/document/ownership-check/<int:document_id>")
+@login_required
+def ownership_check_document(document_id):
+    """Display a document only when it belongs to the signed-in user."""
+    document = get_document_by_id(document_id)
+
+    if document is None:
+        abort(404)
+
+    # Defense 1: retrieve the requested object, then authorize access by
+    # comparing its owner with the authenticated user from the session.
+    if document["owner_id"] != g.user["id"]:
+        abort(403)
+
+    owner = get_user_by_id(document["owner_id"])
+    return render_template(
+        "document.html",
+        document=document,
+        owner=owner,
+        route_type="ownership_check",
     )
 
 

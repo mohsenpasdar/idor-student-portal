@@ -7,8 +7,8 @@
     <h1>{{ g.user['name'] }}'s documents</h1>
     <div class="notice">
         This list is safely filtered using your signed-in user ID. The
-        individual document link intentionally uses the vulnerable Phase 2.7
-        route for our controlled experiment.
+        document links let you compare the vulnerable route with the Phase 3.1
+        ownership-check defense.
     </div>
 
     {% if documents %}
@@ -22,9 +22,13 @@
                     <div class="document-actions">
                         <span class="document-id">Document ID {{ document['id'] }}</span>
                         <a
-                            class="button button-secondary"
+                            class="button button-secondary button-vulnerable"
                             href="{{ url_for('vulnerable_document', document_id=document['id']) }}"
-                        >Open document</a>
+                        >Vulnerable route</a>
+                        <a
+                            class="button button-secondary button-secure"
+                            href="{{ url_for('ownership_check_document', document_id=document['id']) }}"
+                        >Ownership check</a>
                     </div>
                 </article>
             {% endfor %}

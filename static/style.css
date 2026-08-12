@@ -112,6 +112,26 @@ p {
     background: #cadcf0;
 }
 
+.button-vulnerable {
+    background: #fff4e5;
+    color: #75430d;
+}
+
+.button-vulnerable:hover,
+.button-vulnerable:focus-visible {
+    background: #f7dfbd;
+}
+
+.button-secure {
+    background: #eaf7f1;
+    color: #155b3e;
+}
+
+.button-secure:hover,
+.button-secure:focus-visible {
+    background: #cfeadc;
+}
+
 .inline-form {
     display: inline;
 }
@@ -218,7 +238,9 @@ p {
 .document-actions {
     display: flex;
     flex: 0 0 auto;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
 }
 
@@ -310,6 +332,22 @@ p {
 .back-link {
     color: #2463a8;
     font-weight: 700;
+}
+
+.error-page {
+    text-align: center;
+}
+
+.error-code {
+    margin: 0 0 8px;
+    color: #b93737;
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.error-page .button {
+    margin-top: 12px;
 }
 
 @media (max-width: 640px) {
