@@ -6,14 +6,14 @@
     <p class="eyebrow">Local security demonstration</p>
     <h1>Student Document Portal</h1>
     <p>
-        This educational Flask application will demonstrate an IDOR
+        This educational Flask application demonstrates an IDOR
         vulnerability and two server-side authorization defenses.
     </p>
 
     {% if g.user %}
         <div class="notice">
-            Phase 3.2 is complete: compare the intentionally vulnerable route
-            with the ownership-check and user-scoped-query defenses.
+            Compare the intentionally vulnerable route with two server-side
+            authorization defenses using the same document requests.
         </div>
         <a class="button" href="{{ url_for('dashboard') }}">Open dashboard</a>
     {% else %}
